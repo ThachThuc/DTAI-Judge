@@ -5,6 +5,7 @@ Map module for the "botwar ship" game.
 import copy
 from typing import Dict, List, Optional, Any
 
+from items.treasure import Treasure
 from models.coordinate import Coordinate
 from models.cell import Cell
 from utils.validators import validate_coordinate_bounds
@@ -134,7 +135,8 @@ class Map:
                     "q": coord.q,
                     "r": coord.r,
                     "s": coord.s,
-                    "value": value
+                    "value": value,
+                    "is_treasure": isinstance(item, Treasure),
                 })
 
         return result

@@ -26,6 +26,25 @@ class Direction(Enum):
     NW = auto()
     NE = auto()
 
+    def spin(self, steps: int) -> 'Direction':
+        """
+        Spin the direction by 120 degrees per step.
+
+        Args:
+            steps: Number of steps to spin the direction
+
+        Returns:
+            Spun direction
+        """
+        if self == Direction.O:
+            return self
+        while steps < 0:
+            steps += 3
+        all_directions = Direction.all_non_origin()
+        index = all_directions.index(self)
+        new_index = (index + steps * 2) % len(all_directions)
+        return all_directions[new_index]
+
     @staticmethod
     def all_non_origin():
         """

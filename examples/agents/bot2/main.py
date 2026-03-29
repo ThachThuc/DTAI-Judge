@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from collections import deque
-
+import random
 
 def read_tokens(file):
     return file.readline().strip().split()

@@ -9,7 +9,6 @@ import math
 from models.coordinate import Coordinate
 from models.direction import Direction
 from models.map import Map
-from utils.constants import MISSILE_DAMAGE_ONE, MISSILE_DAMAGE_TWO
 
 
 class Player:
@@ -32,6 +31,7 @@ class Player:
         self.alive = True
         self.missiles = missiles
         self.missiles_fired = []
+        self.distributed_gold_to = []  # List of coordinates that gold has been distributed to
 
     def move(self, direction: Direction, map: 'Map'):
         """
@@ -88,12 +88,13 @@ class Player:
 
         self.shield = True
 
-    def hit_by_missile(self, count: int) -> int:
+    def hit_by_missile(self, count: int, steps_left: int) -> int:
         """
         Apply the effect of being hit by missiles.
         
         Args:
             count: Number of missiles hit by
+            steps_left: Number of steps left in the game
             
         Returns:
             Amount of gold lost
@@ -101,9 +102,11 @@ class Player:
         if count <= 0:
             return 0
 
-        # Calculate gold lost based on missile count
-        percentage = MISSILE_DAMAGE_ONE if count == 1 else MISSILE_DAMAGE_TWO  # 20% for 1 missile, 30% for 2+ missiles
-        gold_lost = math.ceil(self.gold * percentage)
+        #lose min(20 + k, 40) x g / 200 golds
+        # g is the total gold of that player, k is the number of steps left and not counted as the current step
+        multiplier = min(20 + steps_left-1, 40)
+        gold_lost = math.ceil(multiplier * self.gold / 200) * count
 
+        self.shield = False
         self.gold -= gold_lost
         return gold_lost

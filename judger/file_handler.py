@@ -64,7 +64,7 @@ class FileHandler:
         with open(path, 'w', encoding='utf-8') as f:
             f.write(data)
 
-    def parse_agent_input(self, input_str: str) -> Move:
+    def parse_agent_input(self, input_str: str, team_id: int) -> Move:
         """
         Parse agent input string into a Move object.
         
@@ -76,6 +76,7 @@ class FileHandler:
         
         Args:
             input_str: Input string from the agent
+            team_id: Team ID (0-2)
             
         Returns:
             Move object representing the parsed move
@@ -85,10 +86,11 @@ class FileHandler:
         # Parse direction
         direction_str = lines[0].strip().upper()
 
-        if direction_str in [d.name for d in Direction]:
-            direction = Direction[direction_str]
-        else:
-            direction = Direction.O
+        direction = Direction.O
+        for d in Direction:
+            if d.name == direction_str:
+                direction = d.spin(team_id)
+                break
 
         # Parse missile targets if any
         missile_targets = []
@@ -98,7 +100,7 @@ class FileHandler:
                 for idx in range(int(lines[1])):
                     try:
                         q, r, s = map(int, lines[2 + idx].strip().split())
-                        missile_targets.append(Coordinate(q, r, s))
+                        missile_targets.append(Coordinate(q, r, s).spin(team_id))
                     except ValueError:
                         # Invalid, skip all missile targets
                         missile_targets = []
@@ -138,21 +140,7 @@ class FileHandler:
         if not state.started:
             # Phase 0: Position selection
             output_lines.append(f"{state.map.radius} {state.moves_left} 0")
-            output_lines.append(f"{team_id + 1}")
-
-            # Count cells with non-empty value
-            non_empty_cells = []
-            for coord, cell in state.map.cells.items():
-                if not cell.is_empty():
-                    item = cell.get_item()
-                    value = self._get_item_value_str(item)
-                    non_empty_cells.append((coord, value))
-
-            output_lines.append(str(len(non_empty_cells)))
-
-            # Add the cell data
-            for coord, value in non_empty_cells:
-                output_lines.append(f"{coord.q} {coord.r} {coord.s} {value}")
+            output_lines.append("1")
 
         else:
             # Phase 1: Movement
@@ -160,25 +148,27 @@ class FileHandler:
 
             # Players info
             players = [state.players[(team_id + i) % 3] for i in range(3)]
+            coord = players[0].position.spin(-team_id)
             output_lines.append(
-                f"{players[0].position.q} {players[0].position.r} {players[0].position.s} {players[0].gold} {int(players[0].shield)} {players[0].missiles}")
+                f"{coord.q} {coord.r} {coord.s} {players[0].gold} {int(players[0].shield)} {players[0].missiles}")
             for player in players[1:]:
+                coord = player.position.spin(-team_id)
                 output_lines.append(
-                    f"{player.position.q} {player.position.r} {player.position.s} {int(player.alive)} {player.gold} {int(player.shield)}")
+                    f"{coord.q} {coord.r} {coord.s} {int(player.alive)} {player.gold} {int(player.shield)}")
 
-            # Count non-empty cells
-            non_empty_cells = []
-            for coord, cell in state.map.cells.items():
-                if not cell.is_empty():
-                    item = cell.get_item()
-                    value = self._get_item_value_str(item)
-                    non_empty_cells.append((coord, value))
+        # Count non-empty cells
+        non_empty_cells = []
+        for coord, cell in state.map.cells.items():
+            if not cell.is_empty():
+                item = cell.get_item()
+                value = self._get_item_value_str(item)
+                non_empty_cells.append((coord.spin(-team_id), value))
 
-            output_lines.append(str(len(non_empty_cells)))
+        output_lines.append(str(len(non_empty_cells)))
 
-            # Add the cell data
-            for coord, value in non_empty_cells:
-                output_lines.append(f"{coord.q} {coord.r} {coord.s} {value}")
+        # Add the cell data
+        for coord, value in non_empty_cells:
+            output_lines.append(f"{coord.q} {coord.r} {coord.s} {value}")
 
         return '\n'.join(output_lines)
 

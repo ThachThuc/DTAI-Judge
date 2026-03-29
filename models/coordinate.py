@@ -70,6 +70,24 @@ class Coordinate:
         """
         return (abs(self.q - other.q) + abs(self.r - other.r) + abs(self.s - other.s)) // 2
 
+    def spin(self, steps: int) -> 'Coordinate':
+        """
+        Spin the coordinate around the origin by 120 degrees per step.
+
+        Args:
+            steps: Number of steps to spin (positive for clockwise, negative for counterclockwise)
+
+        Returns:
+            Spun coordinate
+        """
+        q, r, s = self.q, self.r, self.s
+        while steps < 0:
+            steps += 3
+        while steps > 0:
+            q, r, s = s, q, r
+            steps -= 1
+        return Coordinate(q, r, s)
+
     def to_tuple(self) -> Tuple[int, int, int]:
         """
         Convert the coordinate to a tuple.
