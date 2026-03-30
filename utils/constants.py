@@ -7,6 +7,7 @@ Constants module for the "botwar ship" game.
 import os
 from pathlib import Path
 import pwd
+from zoneinfo import ZoneInfo
 
 
 TOTAL_GOLD = 300
@@ -31,4 +32,11 @@ GOLD_DISTRIBUTION_RADIUS = 3  # Manhattan distance for distributing lost gold
 TIMEOUT = 1.5  # Timeout for agent execution in seconds
 
 # Execute agent config
-JUDGE_DIR = Path(os.getcwd()) / "judgedir"
+JUDGE_DIR = Path(os.getcwd()) / "runguard" / "judgedir"
+RUNGUARD_CMD = f'sudo -n runguard/runguard -r "{JUDGE_DIR}" --filesize=4194304 --streamsize=1024 --memsize=4194304 --no-core --walltime=1.5 --user={pwd.getpwuid(os.getuid())[0]}'
+
+# data/matches/<id>/info.json
+MATCH_INFO_STATUS_RUNNING = "RUNNING"
+MATCH_INFO_STATUS_COMPLETED = "COMPLETED"
+MATCH_INFO_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+

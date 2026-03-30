@@ -97,7 +97,31 @@ class Judger:
 
             self.game_state.transform_to_next_turn()
 
+        self.finalize_match_info()
         self.cleanup_state_files()
+
+    def finalize_match_info(self) -> None:
+        """
+        Update match info.json: status COMPLETED and moves = highest completed turn index
+        (last exported step number; see export/transform order in run_game).
+        """
+        info_path = os.path.join(self.log_dir, "info.json")
+        if not os.path.isfile(info_path):
+            return
+        try:
+            with open(info_path, encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            self.logger.warning("Could not read match info.json for finalize: %s", e)
+            return
+        data["status"] = MATCH_INFO_STATUS_COMPLETED
+        data["moves"] = max(0, self.game_state.turn - 1)
+        try:
+            with open(info_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+                f.write("\n")
+        except OSError as e:
+            self.logger.warning("Could not write match info.json on completion: %s", e)
 
     def cleanup_state_files(self):
         """Clean up any state files generated during the game."""
