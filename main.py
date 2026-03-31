@@ -75,8 +75,8 @@ def parse_args():
     parser.add_argument(
         "--players",
         nargs=3,
-        required=True,
         metavar=("P1", "P2", "P3"),
+        default=["P1", "P2", "P3"],
         help="Three player ids for match metadata (one per slot)",
     )
     parser.add_argument("--output", required=True, help="Output directory for game logs")
