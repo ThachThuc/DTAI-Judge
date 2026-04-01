@@ -139,7 +139,7 @@ class FileHandler:
 
         if not state.started:
             # Phase 0: Position selection
-            output_lines.append(f"{state.map.radius} {state.moves_left} 0")
+            output_lines.append(f"{state.map.radius} {state.max_moves} 0")
             output_lines.append("1")
 
         else:
