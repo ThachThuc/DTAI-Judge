@@ -32,6 +32,7 @@ class GameState:
         self.players = list[Player] ()
         self.turn = 0
         self.moves_left = max_moves + 1 # +1 for the starting position
+        self.max_moves = max_moves
         self._initialize_treasure_appearance_turn(max_moves)
 
     def _initialize_treasure_appearance_turn(self, max_moves: int):
@@ -85,6 +86,9 @@ class GameState:
         if len(targets) == 0 or len(targets) > MAX_MISSILES_EACH_TURN:
             return False
         if player.missiles < len(targets):
+            return False
+        cells = [(t.q, t.r, t.s) for t in targets]
+        if len(cells) != len(set(cells)):
             return False
         for target in targets:
             if not self.map.is_valid_coordinate(target) or target == player.position:
@@ -353,7 +357,9 @@ class GameState:
             ],
             "map": {
                 "end_game": self.check_game_end(),
-                "moveleft": self.moves_left,
+                "moveleft": min(self.moves_left, self.max_moves),
+                "current_step": self.turn,
+                "max_moves": self.max_moves,
                 "radius": self.map.radius,
                 "cells": self.map.to_dict_list()
             }
