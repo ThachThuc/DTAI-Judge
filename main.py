@@ -80,7 +80,6 @@ def parse_args():
         help="Three player ids for match metadata (one per slot)",
     )
     parser.add_argument("--output", required=True, help="Output directory for game logs")
-    parser.add_argument("--sandbox", action="store_true", help="Use sandbox for agent execution")
     return parser.parse_args()
 
 
@@ -100,7 +99,7 @@ def main():
         sys.exit(1)
     write_match_info(args.output, args.map, list(args.players), list(args.agents))
 
-    judger = Judger(args.agents, args.map, args.output, use_sandbox=args.sandbox)
+    judger = Judger(args.agents, args.map, args.output)
     judger.run_game()
 
 
